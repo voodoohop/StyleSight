@@ -173,7 +173,7 @@ window.addEventListener("load", async () => {
             if (id=="none") {
                 makeBoxObject()
             } else {
-                makeBoxObject(100)
+                makeBoxObject(20)
 
                 if (!style.model) {
                     loadingNote.style.display = "block"
@@ -266,8 +266,8 @@ window.addEventListener("load", async () => {
     video.width = window.innerWidth
     video.height = window.innerHeight
     await getVideoFeed(video)
-
     const makeBoxObject = async (height) => {
+        console.log("height",height);
         window.video = document.createElement("video")
         video.autoplay = true
         video.width = window.innerWidth
@@ -307,6 +307,12 @@ window.addEventListener("load", async () => {
     window.inferring = true
     const multScalar = tf.scalar(255)
 
+    const timer = (label) => {
+        const id = label+"_"+Number(Math.floor(Math.random()*1000)).toString(16)
+        console.time(id)
+        return () => console.timeEnd(id)
+    }
+
     const render = async () => {
 
         if (video.currentTime) {
@@ -327,13 +333,16 @@ window.addEventListener("load", async () => {
                     const preprocessed = tf.fromPixels(inferenceCanvas)
                     const inferenceResult = Net.predict(preprocessed)
                     preprocessed.dispose()
+    
                     return inferenceResult
                 })
 
                 result.mul(multScalar)
 
                 const total = result.shape[0] * result.shape[1]
+                const endTimer = timer("getData")
                 const data = await result.data()
+                endTimer()
                 const rgbaData = new Uint8Array(total * 4)
 
                 for (let i=0; i<total; i++) {
@@ -508,6 +517,7 @@ class Net {
 
     static predict (preprocessedInput) {
         preprocessedInput.dtype = "float32"
+        console.log(preprocessedInput.shape);
         const conv1 = this.convLayer(preprocessedInput, 1, true, 0)
         const conv2 = this.convLayer(conv1, 2, true, 3)
         const conv3 = this.convLayer(conv2, 2, true, 6)

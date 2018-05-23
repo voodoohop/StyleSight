@@ -43,6 +43,7 @@ class Net {
 
     static predict (preprocessedInput) {
         preprocessedInput.dtype = "float32"
+        console.log(preprocessedInput.shape);
         const conv1 = this.convLayer(preprocessedInput, 1, true, 0)
         const conv2 = this.convLayer(conv1, 2, true, 3)
         const conv3 = this.convLayer(conv2, 2, true, 6)
